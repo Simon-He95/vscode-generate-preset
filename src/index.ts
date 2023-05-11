@@ -2,11 +2,11 @@ import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import * as vscode from 'vscode'
 
-type Option = 'Tailwind - js' | 'Tailwind - ts' | 'Unocss - js' | 'Unocss - ts'
+type Option = 'Tailwind - js' | 'Tailwind - ts' | 'Unocss - js' | 'Unocss - ts' | 'Pinia - js' | 'Pinia - ts'
 const has = '已存在'
 export function activate(context: any) {
   const options: Option[] = [
-    'Tailwind - js', 'Tailwind - ts', 'Unocss - js', 'Unocss - ts',
+    'Tailwind - js', 'Tailwind - ts', 'Unocss - js', 'Unocss - ts', 'Pinia - js', 'Pinia - ts',
   ]
   const disposable = vscode.commands.registerCommand('myExtension.myCommand', async (filePath) => {
     const option = await vscode.window.showQuickPick(options) as Option
@@ -25,8 +25,8 @@ export function deactivate() {
 }
 
 function generateFile(option: Option, filePath: string) {
+  const end = option.endsWith('js') ? 'js' : 'ts'
   if (option.startsWith('Tailwind')) {
-    const end = option.endsWith('js') ? 'js' : 'ts'
     const config = fileURLToPath(`${filePath}/tailwind.config.${end}`)
     if (fs.existsSync(config))
       return Promise.resolve(has)
@@ -42,7 +42,6 @@ module.exports = {
 `, 'utf-8')
   }
   else if (option.startsWith('Unocss')) {
-    const end = option.endsWith('js') ? 'js' : 'ts'
     const config = fileURLToPath(`${filePath}/unocss.config.${end}`)
     if (fs.existsSync(config))
       return Promise.resolve(has)
@@ -83,5 +82,57 @@ export default defineConfig({
   ],
 })
 `, 'utf-8')
+  }
+  else if (option.startsWith('Pinia')) {
+    const config = fileURLToPath(`${filePath}/pinia_demo.${end}`)
+    if (fs.existsSync(config))
+      return Promise.resolve(has)
+    return fs.promises.writeFile(config, `// @ts-check
+import { defineStore, acceptHMRUpdate } from 'pinia'
+
+/**
+ * Simulate a login
+ */
+function apiLogin(a: string, p: string) {
+  if (a === 'ed' && p === 'ed') return Promise.resolve({ isAdmin: true })
+  if (p === 'ed') return Promise.resolve({ isAdmin: false })
+  return Promise.reject(new Error('invalid credentials'))
+}
+
+export const useUserStore = defineStore({
+  id: 'user',
+  state: () => ({
+    name: 'Eduardo',
+    isAdmin: true,
+  }),
+
+  actions: {
+    logout() {
+      this.$patch({
+        name: '',
+        isAdmin: false,
+      })
+
+      // we could do other stuff like redirecting the user
+    },
+
+    /**
+     * Attempt to login a user
+     */
+    async login(user: string, password: string) {
+      const userData = await apiLogin(user, password)
+
+      this.$patch({
+        name: user,
+        ...userData,
+      })
+    },
+  },
+})
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useUserStore, import.meta.hot))
+}
+      `, 'utf-8')
   }
 }
