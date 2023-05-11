@@ -2,7 +2,7 @@
   "publisher": "simonhe",
   "name": "vscode-generate-preset",
   "displayName": "vscode-generate-preset",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "packageManager": "pnpm@8.1.1",
   "description": "vscode-generate-preset",
   "author": "Simon He <https://github.com/Simon-He95>",
@@ -34,16 +34,20 @@
     "onStartupFinished"
   ],
   "contributes": {
-    "commands": [{
-      "command": "myExtension.myCommand",
-      "title": "Generate Preset"
-    }],
-    "menus": {
-      "explorer/context": [{
+    "commands": [
+      {
         "command": "myExtension.myCommand",
-        "group": "editor",
-        "when": "explorerResourceIsFolder"
-      }]
+        "title": "Generate Preset"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "myExtension.myCommand",
+          "group": "editor",
+          "when": "explorerResourceIsFolder"
+        }
+      ]
     }
   },
   "scripts": {
