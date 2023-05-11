@@ -3,6 +3,8 @@
 </p>
 <p align="center"> <a href="./README.md">English</a> | 简体中文</p>
 
+>WIP: Automatically generate preset files for some commonly used frameworks
+
 ## :coffee:
 
 [请我喝一杯咖啡](https://github.com/Simon-He95/sponsor)
