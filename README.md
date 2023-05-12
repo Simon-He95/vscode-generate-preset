@@ -3,7 +3,7 @@
 </p>
 <p align="center"> English | <a href="./README_zh.md">简体中文</a></p>
 
->WIP: 自动生成一些常用框架的预设文件
+自动生成一些常用框架的预设文件
 
 ## :coffee:
 

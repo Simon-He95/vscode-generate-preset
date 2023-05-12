@@ -1,7 +1,7 @@
 {
   "publisher": "simonhe",
   "name": "vscode-generate-preset",
-  "displayName": "vscode-generate-preset",
+  "displayName": "vscode generate preset",
   "version": "0.0.2",
   "packageManager": "pnpm@8.1.1",
   "description": "vscode-generate-preset",
