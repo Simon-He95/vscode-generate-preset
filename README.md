@@ -3,7 +3,13 @@
 </p>
 <p align="center"> English | <a href="./README_zh.md">简体中文</a></p>
 
-自动生成一些常用框架的预设文件，可以自己配置 user snippet 下的 template.code-snippets 去配置新的模板创建，[key]: 对应文件名和展示的下拉选项，[value]: 对应字符串的模板
+Configure the preset template, and then add it to the right-click. As a quick way to create files, you can configure the template.code-snippets under the user snippet to configure the new template creation, [key]: the corresponding file name And the drop-down option displayed, [value]: the template of the corresponding string (it is recommended to add presets through the Add Preset provided by the plug-in, because it is read through json, there is no way to use the template string, and it is inconvenient to change the configuration file directly)
+
+## Usages
+
+Right-click on the file directory and you will see `Preset`. If you move to `Preset`, you will add the template `Add Preset`, delete the template `Delte Preset`, and select the template `Select Preset` The default template will contain the configuration of tailwind.config and unocss.config. You can add some templates in your development as a shortcut to create files.
+
+![demo](/assets/demo.gif)
 
 ## :coffee:
 

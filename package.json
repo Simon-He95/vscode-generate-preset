@@ -63,7 +63,7 @@
     "commands": [
       {
         "command": "vscode-generate-preset.run",
-        "title": "Generate Preset"
+        "title": "Select Preset"
       },
       {
         "command": "vscode-generate-preset.add",

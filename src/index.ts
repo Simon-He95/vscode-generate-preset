@@ -64,7 +64,7 @@ export async function activate(context: any) {
     if (!filename)
       return
     // 临时创建一个文件用来储存模板
-    const tempFile = path.join(os.tmpdir(), 'template.tmp')
+    const tempFile = path.join(os.tmpdir(), `${filename}.tmp`)
     await fs.promises.writeFile(tempFile, '')
     openFile(tempFile)
 
@@ -112,6 +112,7 @@ export async function activate(context: any) {
 
     try {
       fs.promises.writeFile(templateUri, JSON.stringify(userJSON))
+      message.info(`${option.join('、')} 模板已被移除`)
     }
     catch (error: any) {
       message.error(error)
