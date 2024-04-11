@@ -5,6 +5,7 @@ import os from 'node:os'
 import process from 'node:process'
 import { createInput, createSelect, message, openFile, registerCommand } from '@vscode-use/utils'
 import type { Disposable } from 'vscode'
+import JSON5 from 'json5'
 import templateJson from './template'
 
 const has = '已存在'
@@ -126,7 +127,7 @@ export async function activate(context: any) {
     try {
       const d = await fs.promises.readFile(templateUri, 'utf-8')
       const result = d.replace(/(\/\/[^\n]*\n)|(\n\s*\/\/[^\n]*)/g, '')
-      userJSON = JSON.parse(result)
+      userJSON = JSON5.parse(result)
     }
     catch (e) {
       message.error(`${templateUri}的配置不是一个可以被解析的 json`)
