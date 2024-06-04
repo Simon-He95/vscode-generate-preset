@@ -40,14 +40,26 @@ export async function activate(context: any) {
     const option = await createSelect(options)
     if (!option)
       return
-    const url = fileURLToPath(`${filePath}/${option}`)
-
-    generateFile(url, template[option])?.then((r) => {
-      message.info(r === has
-        ? `${option} preset 已存在`
-        : `${option} preset generate successfully 🎉`)
-      openFile(url)
-    })
+    if (Array.isArray(template[option])) {
+      option.split('|').forEach((o, i) => {
+        const url = fileURLToPath(`${filePath}/${o}`)
+        generateFile(url, template[option][i])?.then((r) => {
+          message.info(r === has
+            ? `${option} preset 已存在`
+            : `${option} preset generate successfully 🎉`)
+          openFile(url)
+        })
+      })
+    }
+    else {
+      const url = fileURLToPath(`${filePath}/${option}`)
+      generateFile(url, template[option])?.then((r) => {
+        message.info(r === has
+          ? `${option} preset 已存在`
+          : `${option} preset generate successfully 🎉`)
+        openFile(url)
+      })
+    }
   }))
 
   disposables.push(registerCommand('vscode-generate-preset.add', async () => {
@@ -141,7 +153,7 @@ export function deactivate() {
   closers.length = 0
 }
 
-async function generateFile(url: string, templateStr: string) {
+async function generateFile(url: string, templateStr: string | string[]) {
   if (fs.existsSync(url))
     return Promise.resolve(has)
 
