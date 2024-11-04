@@ -5,6 +5,7 @@ export default `import {
   presetUno,
   presetWebFonts,
 } from 'unocss'
+// need install unocss
 
 export default defineConfig({
   shortcuts: [

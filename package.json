@@ -28,7 +28,7 @@
     "dist"
   ],
   "engines": {
-    "vscode": "^1.94.0"
+    "vscode": "^1.95.0"
   },
   "activationEvents": [
     "onStartupFinished"
@@ -88,10 +88,10 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.27.3",
-    "@types/node": "^18.19.55",
-    "@types/vscode": "^1.94.0",
-    "@vscode-use/utils": "0.1.10-beta.1",
-    "bumpp": "^9.7.1",
+    "@types/node": "^18.19.64",
+    "@types/vscode": "^1.95.0",
+    "@vscode-use/utils": "0.1.36",
+    "bumpp": "^9.8.1",
     "eslint": "^8.57.1",
     "esno": "^0.16.3",
     "json5": "^2.2.3",
