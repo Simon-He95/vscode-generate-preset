@@ -26,7 +26,7 @@ export = createExtension(async () => {
         const option = await createSelect(options)
         if (!option)
           return
-        const messageInTempalte = /\/\/\s+vscode-message:\s*(.*)/
+        const messageInTempalte = /\/\/\s+vscode-message:\s*(.*)\n*/
         if (Array.isArray(template[option])) {
           option.split('|').forEach((o: string, i: number) => {
             const url = fileURLToPath(`${filePath}/${o}`)
