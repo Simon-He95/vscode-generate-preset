@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import os from 'node:os'
 import process from 'node:process'
-import { createExtension, createInput, createSelect, message, openFile, registerCommand } from '@vscode-use/utils'
+import { createExtension, createInput, createSelect, message, openFile, registerCommand, setCopyText } from '@vscode-use/utils'
 import JSON5 from 'json5'
 import templateJson from './template'
 
@@ -26,20 +26,61 @@ export = createExtension(async () => {
         const option = await createSelect(options)
         if (!option)
           return
+        const messageInTempalte = /\/\/\s+vscode-message:\s*(.*)/
         if (Array.isArray(template[option])) {
           option.split('|').forEach((o: string, i: number) => {
             const url = fileURLToPath(`${filePath}/${o}`)
-            generateFile(url, template[option][i])?.then((r) => {
+            let messageContent = ''
+            let copyText = ''
+            const templateStr = template[option][i].replace(messageInTempalte, (_, content) => {
+              [messageContent, copyText] = content.split(' | ')
+              return ''
+            })
+            if (messageContent) {
+              copyText
+                ? message.info({
+                  message: messageContent,
+                  buttons: [
+                    '复制内容',
+                  ],
+                }).then((choose) => {
+                  if (choose === '复制内容') {
+                    setCopyText(copyText || messageContent)
+                  }
+                })
+                : message.info(messageContent)
+            }
+            generateFile(url, templateStr)?.then((r) => {
               message.info(r === has
-                ? `${option} preset 已存在`
-                : `${option} preset generate successfully 🎉`)
+                ? `${o} preset 已存在`
+                : `${o} preset generate successfully 🎉`)
               openFile(url)
             })
           })
         }
         else {
+          let messageContent = ''
+          let copyText = ''
+          const templateStr = template[option].replace(messageInTempalte, (_, content) => {
+            [messageContent, copyText] = content.split(' | ')
+            return ''
+          })
+          if (messageContent) {
+            copyText
+              ? message.info({
+                message: messageContent,
+                buttons: [
+                  '复制内容',
+                ],
+              }).then((choose) => {
+                if (choose === '复制内容') {
+                  setCopyText(copyText || messageContent)
+                }
+              })
+              : message.info(messageContent)
+          }
           const url = fileURLToPath(`${filePath}/${option}`)
-          generateFile(url, template[option])?.then((r) => {
+          generateFile(url, templateStr)?.then((r) => {
             message.info(r === has
               ? `${option} preset 已存在`
               : `${option} preset generate successfully 🎉`)
@@ -154,7 +195,7 @@ function getSnippetUrl() {
   return snippetsDir
 }
 
-async function generateFile(url: string, templateStr: string | string[]) {
+async function generateFile(url: string, templateStr: string) {
   if (fs.existsSync(url))
     return Promise.resolve(has)
 
