@@ -1,11 +1,12 @@
 import fs from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import path from 'node:path'
 import os from 'node:os'
+import path from 'node:path'
 import process from 'node:process'
 import { createExtension, createInput, createSelect, message, openFile, registerCommand, setCopyText } from '@vscode-use/utils'
 import JSON5 from 'json5'
+import * as vscode from 'vscode'
 import templateJson from './template'
+import { type TemplateFilePath, type TemplateValue, resolveTemplatePath, splitTemplateMessage } from './template-helpers'
 
 const has = '已存在'
 
@@ -19,23 +20,22 @@ export = createExtension(async () => {
       await fs.promises.writeFile(templateUri, JSON.stringify(templateJson))
 
     return [
-      registerCommand('vscode-generate-preset.run', async (filePath) => {
+      registerCommand('vscode-generate-preset.run', async (filePath: TemplateFilePath | undefined) => {
+        if (!filePath) {
+          message.error('请在资源管理器中的目录上使用 Select Preset')
+          return
+        }
+
         const userJSON = await getUserJSon()
-        const template: Record<string, string> = Object.assign({}, templateJson, userJSON)
+        const template: Record<string, TemplateValue> = Object.assign({}, templateJson, userJSON)
         const options = Object.keys(template)
         const option = await createSelect(options)
         if (!option)
           return
-        const messageInTempalte = /\/\/\s+vscode-message:\s*(.*)\n*/
         if (Array.isArray(template[option])) {
-          option.split('|').forEach((o: string, i: number) => {
-            const url = fileURLToPath(`${filePath}/${o}`)
-            let messageContent = ''
-            let copyText = ''
-            const templateStr = template[option][i].replace(messageInTempalte, (_, content) => {
-              [messageContent, copyText] = content.split(' | ')
-              return ''
-            })
+          for (const [i, o] of option.split('|').entries()) {
+            const url = resolveTemplatePath(filePath, o)
+            const { template: templateStr, messageContent, copyText } = splitTemplateMessage(template[option][i])
             if (messageContent) {
               copyText
                 ? message.info({
@@ -50,21 +50,15 @@ export = createExtension(async () => {
                 })
                 : message.info(messageContent)
             }
-            generateFile(url, templateStr)?.then((r) => {
-              message.info(r === has
-                ? `${o} preset 已存在`
-                : `${o} preset generate successfully 🎉`)
-              openFile(url)
-            })
-          })
+            const result = await generateFile(url, templateStr)
+            message.info(result === has
+              ? `${o} preset 已存在`
+              : `${o} preset generate successfully 🎉`)
+            await openFile(url)
+          }
         }
         else {
-          let messageContent = ''
-          let copyText = ''
-          const templateStr = template[option].replace(messageInTempalte, (_, content) => {
-            [messageContent, copyText] = content.split(' | ')
-            return ''
-          })
+          const { template: templateStr, messageContent, copyText } = splitTemplateMessage(template[option])
           if (messageContent) {
             copyText
               ? message.info({
@@ -79,13 +73,12 @@ export = createExtension(async () => {
               })
               : message.info(messageContent)
           }
-          const url = fileURLToPath(`${filePath}/${option}`)
-          generateFile(url, templateStr)?.then((r) => {
-            message.info(r === has
-              ? `${option} preset 已存在`
-              : `${option} preset generate successfully 🎉`)
-            openFile(url)
-          })
+          const url = resolveTemplatePath(filePath, option)
+          const result = await generateFile(url, templateStr)
+          message.info(result === has
+            ? `${option} preset 已存在`
+            : `${option} preset generate successfully 🎉`)
+          await openFile(url)
         }
       }),
       registerCommand('vscode-generate-preset.add', async () => {
@@ -105,35 +98,49 @@ export = createExtension(async () => {
         // 临时创建一个文件用来储存模板
         const tempFile = path.join(os.tmpdir(), `${filename}.tmp`)
         await fs.promises.writeFile(tempFile, '')
-        openFile(tempFile)
 
-        // Listen for the tempFile to be closed
-        let preTemplateStr = ''
-        const watcher = fs.watch(tempFile, async (eventType, _filename) => {
-          if (eventType === 'rename' && !_filename) {
-            // tempFile has been closed
-            // Add your code here to handle the event
-            fs.promises.unlink(tempFile)
-            watcher.close()
+        let preTemplateStr: string | undefined
+        const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (document) => {
+          if (document.uri.fsPath !== tempFile)
+            return
+
+          const templateStr = document.getText()
+          if (preTemplateStr === templateStr)
+            return
+
+          preTemplateStr = templateStr
+          const updateUserJson = Object.assign(userJSON, { [filename]: templateStr })
+          try {
+            await fs.promises.writeFile(templateUri, JSON.stringify(updateUserJson))
           }
-          else if (eventType === 'change') {
-            const templateStr = await fs.promises.readFile(tempFile, 'utf-8')
-            if (!preTemplateStr)
-              preTemplateStr = templateStr
-            else if (preTemplateStr === templateStr)
-              return
-            else
-              preTemplateStr = templateStr
-            const updateUserJson = Object.assign(userJSON, { [filename]: templateStr })
-            try {
-              fs.promises.writeFile(templateUri, JSON.stringify(updateUserJson))
-            }
-            catch (error: any) {
-              message.error(error)
-            }
+          catch (error: any) {
+            message.error(error)
           }
         })
-        closers.push(watcher.close)
+        const closeSaveListener = () => saveDisposable.dispose()
+        let closeCloseListener = () => undefined
+        const cleanupTempFile = () => {
+          closeSaveListener()
+          closeCloseListener()
+          const cleanupIndex = closers.indexOf(cleanupTempFile)
+          if (cleanupIndex >= 0)
+            closers.splice(cleanupIndex, 1)
+
+          if (fs.existsSync(tempFile))
+            fs.rmSync(tempFile)
+        }
+
+        const closeDisposable = vscode.workspace.onDidCloseTextDocument((document) => {
+          if (document.uri.fsPath !== tempFile)
+            return
+
+          cleanupTempFile()
+        })
+        closeCloseListener = () => closeDisposable.dispose()
+
+        closers.push(cleanupTempFile)
+        await openFile(tempFile)
+        message.info('保存临时文件后写入模板，关闭标签后清理临时文件')
       }),
       registerCommand('vscode-generate-preset.delete', async () => {
         const userJSON = await getUserJSon()
@@ -149,7 +156,7 @@ export = createExtension(async () => {
         (option).forEach((k: string) => delete userJSON[k])
 
         try {
-          fs.promises.writeFile(templateUri, JSON.stringify(userJSON))
+          await fs.promises.writeFile(templateUri, JSON.stringify(userJSON))
           message.info(`${option.join('、')} 模板已被移除`)
         }
         catch (error: any) {
@@ -159,7 +166,7 @@ export = createExtension(async () => {
     ]
 
     async function getUserJSon() {
-      let userJSON: Record<string, string> = {}
+      let userJSON: Record<string, TemplateValue> = {}
       try {
         const d = await fs.promises.readFile(templateUri, 'utf-8')
         const result = d.replace(/(\/\/[^\n]*\n)|(\n\s*\/\/[^\n]*)/g, '')
@@ -197,7 +204,7 @@ function getSnippetUrl() {
 
 async function generateFile(url: string, templateStr: string) {
   if (fs.existsSync(url))
-    return Promise.resolve(has)
+    return has
 
-  return fs.promises.writeFile(url, templateStr, 'utf-8')
+  await fs.promises.writeFile(url, templateStr, 'utf-8')
 }

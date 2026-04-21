@@ -1,8 +1,8 @@
 import pinia from './template.pinia'
-import tailwind from './template.tailwind'
-import unocss from './template.unocss'
 import postcssConfig from './template.postcss'
-import tailwindCss from './template.tailwind.css.ts'
+import tailwind from './template.tailwind'
+import tailwindCss from './template.tailwind.css'
+import unocss from './template.unocss'
 
 export default {
   'pinia_demo.ts': pinia,

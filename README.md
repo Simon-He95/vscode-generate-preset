@@ -1,5 +1,5 @@
 <p align="center">
-<img height="200" src="./assets/kv.png" alt="generate preset">
+<img height="200" src="https://raw.githubusercontent.com/Simon-He95/vscode-generate-preset/main/assets/kv.png" alt="generate preset">
 </p>
 <p align="center"> English | <a href="./README_zh.md">简体中文</a></p>
 
@@ -7,9 +7,9 @@ Configure the preset template, and then add it to the right-click. As a quick wa
 
 ## Usages
 
-Right-click on the file directory and you will see `Preset`. If you move to `Preset`, you will add the template `Add Preset`, delete the template `Delte Preset`, and select the template `Select Preset` The default template will contain the configuration of tailwind.config and unocss.config. You can add some templates in your development as a shortcut to create files.
+Right-click on the file directory and you will see `Preset`. If you move to `Preset`, you will add the template `Add Preset`, delete the template `Delete Preset`, and select the template `Select Preset` The default template will contain the configuration of tailwind.config and unocss.config. You can add some templates in your development as a shortcut to create files.
 
-![demo](/assets/demo.gif)
+![demo](https://raw.githubusercontent.com/Simon-He95/vscode-generate-preset/main/assets/demo.gif)
 
 ## :coffee:
 
@@ -17,4 +17,4 @@ Right-click on the file directory and you will see `Preset`. If you move to `Pre
 
 ## License
 
-[MIT](./license)
+[MIT](./LICENSE)

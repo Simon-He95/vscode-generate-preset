@@ -1,5 +1,5 @@
 <p align="center">
-<img height="200" src="./assets/kv.png" alt="generate preset">
+<img height="200" src="https://raw.githubusercontent.com/Simon-He95/vscode-generate-preset/main/assets/kv.png" alt="generate preset">
 </p>
 <p align="center"> <a href="./README.md">English</a> | 简体中文</p>
 
@@ -8,7 +8,7 @@
 ## Usages
 选择文件目录右键，可以看到 `Preset`, 移动到 `Preset` 上会有添加模板 `Add Preset`, 删除模板 `Delete Preset`, 和选择模板 `Select Preset`, 默认模板中会含有 tailwind.config 和 unocss.config 的配置，你可以随意添加一些你开发中的模板作为快捷方式创建文件
 
-![demo](/assets/demo.gif)
+![demo](https://raw.githubusercontent.com/Simon-He95/vscode-generate-preset/main/assets/demo.gif)
 
 ## :coffee:
 
@@ -16,4 +16,4 @@
 
 ## License
 
-[MIT](./license)
+[MIT](./LICENSE)

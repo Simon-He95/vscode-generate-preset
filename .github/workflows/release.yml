@@ -11,15 +11,37 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          node-version: 16.x
+          version: 9.15.9
+          run_install: false
 
-      - run: npx changelogithub
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify
+        run: |
+          pnpm lint
+          pnpm test
+          pnpm typecheck
+          pnpm build
+
+      - name: Pack VSIX
+        run: pnpm run pack
+
+      - name: Publish GitHub Release
+        run: npx changelogithub --assets 'vscode-generate-preset-*.vsix'
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
