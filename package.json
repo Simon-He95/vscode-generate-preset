@@ -2,7 +2,7 @@
   "publisher": "simonhe",
   "name": "vscode-generate-preset",
   "displayName": "vscode generate preset",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "packageManager": "pnpm@9.15.9",
   "description": "vscode-generate-preset",
   "author": "Simon He <https://github.com/Simon-He95>",
